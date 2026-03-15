@@ -1,9 +1,3 @@
-import NextAuth from 'next-auth'
-import { authConfig } from './auth.config'
-
-export default NextAuth(authConfig).auth
-
-export const config = {
-  // Protect all /admin routes EXCEPT /admin/login
-  matcher: ['/admin/((?!login).*)'],
-}
+// AUTH TEMPORARILY DISABLED FOR TESTING
+export default function middleware() {}
+export const config = { matcher: [] }

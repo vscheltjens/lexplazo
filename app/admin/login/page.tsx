@@ -1,45 +1,28 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useFormState, useFormStatus } from 'react-dom'
+import { loginAction } from './actions'
+
+function SubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="relative w-full py-3 bg-lx-navy text-white text-sm font-medium tracking-[0.04em] rounded-sm overflow-hidden transition-colors hover:bg-lx-blue disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-lx-ochre focus:ring-offset-2"
+    >
+      <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-lx-ochre" />
+      {pending ? 'Verificando…' : 'Iniciar sesión'}
+    </button>
+  )
+}
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState<string | null>(null)
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-
-    try {
-      const result = await signIn('credentials', {
-        username,
-        password,
-        redirect: false,
-      })
-
-      if (result?.error) {
-        setError('Credenciales incorrectas. Verifica el usuario y la contraseña.')
-      } else {
-        router.push('/admin/tramites')
-        router.refresh()
-      }
-    } catch {
-      setError('Error inesperado. Inténtalo de nuevo.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [state, formAction] = useFormState(loginAction, {})
 
   return (
     <div className="min-h-screen bg-lx-offwhite flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-8">
           <a href="/" className="font-serif text-2xl font-semibold text-lx-navy tracking-wide">
             LexPlazo
@@ -53,20 +36,19 @@ export default function LoginPage() {
             <p className="text-[12px] text-lx-muted mt-1">Introduce tus credenciales de administrador.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="px-6 py-6 space-y-5">
+          <form action={formAction} className="px-6 py-6 space-y-5">
             <div>
               <label htmlFor="username" className="block text-[11px] font-medium text-lx-muted uppercase tracking-[0.04em] mb-1.5">
                 Usuario
               </label>
               <input
                 id="username"
+                name="username"
                 type="text"
                 autoComplete="username"
                 required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                defaultValue="admin"
                 className="w-full px-3 py-2.5 text-sm border border-lx-border rounded-sm bg-white text-lx-text focus:outline-none focus:border-lx-blue transition-colors"
-                placeholder="admin"
               />
             </div>
 
@@ -76,30 +58,22 @@ export default function LoginPage() {
               </label>
               <input
                 id="password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2.5 text-sm border border-lx-border rounded-sm bg-white text-lx-text focus:outline-none focus:border-lx-blue transition-colors"
                 placeholder="••••••••"
               />
             </div>
 
-            {error && (
+            {state?.error && (
               <div role="alert" className="text-[12px] text-red-600 bg-red-50 border border-red-200 px-3 py-2.5 rounded-sm">
-                {error}
+                {state.error}
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="relative w-full py-3 bg-lx-navy text-white text-sm font-medium tracking-[0.04em] rounded-sm overflow-hidden transition-colors hover:bg-lx-blue disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-lx-ochre focus:ring-offset-2"
-            >
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-lx-ochre" />
-              {loading ? 'Verificando…' : 'Iniciar sesión'}
-            </button>
+            <SubmitButton />
           </form>
         </div>
 

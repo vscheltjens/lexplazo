@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Plazos Laborales — Garrigues</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --g-dark:    #0e3028;
+    --g-mid:     #1a4a38;
+    --g-hover:   #22604a;
+    --g-lime:    #5ec97e;
+    --g-lime2:   #3db862;
+    --g-offwhite:#f4f1ec;
+    --g-warm:    #e8e3da;
+    --g-text:    #1a1a18;
+    --g-muted:   #6b7a72;
+    --g-border:  #d4cfc6;
+    --font-serif:'Playfair Display', Georgia, serif;
+    --font-sans: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--g-offwhite);
+    color: var(--g-text);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: white;
+    border-bottom: 1px solid var(--g-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .logo {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--g-dark);
+    letter-spacing: .04em;
+    text-decoration: none;
+  }
+  nav { display: flex; gap: 2rem; }
+  nav a {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--g-muted);
+    text-decoration: none;
+    letter-spacing: .02em;
+    transition: color .2s;
+  }
+  nav a:hover { color: var(--g-dark); }
+  .header-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--g-lime2);
+    background: rgba(94,201,126,.12);
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: .04em;
+  }
+
+  /* ── HERO BAND ── */
+  .hero {
+    background: var(--g-dark);
+    padding: 3.5rem 2.5rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--g-lime2), var(--g-lime), transparent);
+  }
+  .hero-inner { max-width: 1200px; margin: 0 auto; }
+  .hero-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--g-lime);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: .75rem;
+  }
+  .hero h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 500;
+    color: white;
+    line-height: 1.2;
+    max-width: 600px;
+  }
+  .hero p {
+    color: rgba(255,255,255,.55);
+    font-size: 14px;
+    margin-top: .75rem;
+    max-width: 500px;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2.5rem 5rem;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: white;
+    border: 1px solid var(--g-border);
+    border-radius: 2px;
+    margin-bottom: 1.25rem;
+  }
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--g-border);
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+  .card-header-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--g-dark);
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-header h2 {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--g-dark);
+    letter-spacing: .01em;
+  }
+  .card-body { padding: 1.5rem; }
+
+  /* ── TRAMITES ── */
+  .tramite-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .tramite-btn {
+    background: var(--g-offwhite);
+    border: 1px solid var(--g-border);
+    border-radius: 2px;
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+  }
+  .tramite-btn:hover {
+    border-color: var(--g-mid);
+    background: white;
+  }
+  .tramite-btn.selected {
+    background: var(--g-dark);
+    border-color: var(--g-dark);
+  }
+  .tramite-btn.selected::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--g-lime);
+  }
+  .tramite-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--g-dark);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .tramite-btn.selected .tramite-name { color: white; }
+  .tramite-plazo {
+    font-size: 11px;
+    color: var(--g-muted);
+    font-weight: 400;
+  }
+  .tramite-btn.selected .tramite-plazo { color: var(--g-lime); }
+  .tramite-desc {
+    font-size: 12.5px;
+    color: var(--g-muted);
+    background: var(--g-offwhite);
+    border-left: 2px solid var(--g-lime2);
+    padding: 10px 14px;
+    margin-top: 1rem;
+    line-height: 1.5;
+    display: none;
+  }
+  .tramite-desc.show { display: block; }
+
+  /* ── FORM FIELDS ── */
+  .field { margin-bottom: 1.25rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--g-muted);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .field input[type=date],
+  .field select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: var(--font-sans);
+    border: 1px solid var(--g-border);
+    border-radius: 2px;
+    background: white;
+    color: var(--g-text);
+    outline: none;
+    transition: border-color .2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input[type=date]:focus,
+  .field select:focus {
+    border-color: var(--g-mid);
+  }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--g-muted);
+    pointer-events: none;
+  }
+  .field-hint {
+    font-size: 11px;
+    color: var(--g-muted);
+    margin-top: 5px;
+  }
+
+  /* ── CALENDAR PANEL ── */
+  .cal-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--g-border);
+    margin-bottom: 0;
+  }
+  .cal-tab {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--g-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    letter-spacing: .03em;
+    transition: all .2s;
+  }
+  .cal-tab.active {
+    color: var(--g-dark);
+    border-bottom-color: var(--g-lime2);
+  }
+  .cal-panel { display: none; padding: 1rem 1.5rem; max-height: 220px; overflow-y: auto; }
+  .cal-panel.show { display: block; }
+  .cal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--g-warm);
+    font-size: 12.5px;
+  }
+  .cal-row:last-child { border-bottom: none; }
+  .cal-date { color: var(--g-dark); font-weight: 500; min-width: 90px; }
+  .cal-name { color: var(--g-muted); text-align: right; }
+  .boe-tag {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--g-lime2);
+    background: rgba(61,184,98,.1);
+    border: 1px solid rgba(61,184,98,.25);
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 1rem;
+  }
+  .boe-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--g-lime2);
+  }
+
+  /* ── CTA BUTTON ── */
+  .btn-calc {
+    width: 100%;
+    padding: 14px;
+    background: var(--g-dark);
+    color: white;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background .2s;
+  }
+  .btn-calc:hover { background: var(--g-mid); }
+  .btn-calc::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--g-lime);
+  }
+
+  /* ── RESULT PANEL (right column) ── */
+  .result-col { position: sticky; top: 90px; }
+  .result-empty {
+    background: white;
+    border: 1px solid var(--g-border);
+    border-radius: 2px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    color: var(--g-muted);
+  }
+  .result-empty-icon {
+    width: 48px; height: 48px;
+    border: 1px solid var(--g-border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 20px;
+  }
+  .result-empty p { font-size: 13px; line-height: 1.5; }
+
+  .result-card {
+    background: var(--g-dark);
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+    animation: fadeUp .3s ease;
+  }
+  .result-card.show { display: block; }
+  .result-card.warn { background: #3d2008; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-top {
+    padding: 1.75rem 1.5rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    position: relative;
+  }
+  .result-top::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--g-lime2), transparent);
+  }
+  .result-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--g-lime);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+  }
+  .result-date {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 500;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: .5rem;
+  }
+  .result-card.warn .result-date { color: #f4a05a; }
+  .result-weekday {
+    font-size: 13px;
+    color: rgba(255,255,255,.5);
+  }
+
+  .result-body { padding: 1.25rem 1.5rem; }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    font-size: 13px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row-label { color: rgba(255,255,255,.45); }
+  .result-row-val { color: white; font-weight: 500; text-align: right; max-width: 200px; }
+
+  .countdown {
+    margin: 1rem 1.5rem 1.5rem;
+    background: rgba(255,255,255,.06);
+    border-radius: 2px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .countdown-num {
+    font-family: var(--font-serif);
+    font-size: 36px;
+    font-weight: 500;
+    color: var(--g-lime);
+    line-height: 1;
+  }
+  .result-card.warn .countdown-num { color: #f4a05a; }
+  .countdown-text { font-size: 12px; color: rgba(255,255,255,.5); line-height: 1.4; }
+  .warn-alert {
+    margin: 0 1.5rem 1.5rem;
+    background: rgba(244,160,90,.1);
+    border: 1px solid rgba(244,160,90,.3);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #f4a05a;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+  }
+  .warn-alert::before {
+    content: '!';
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1px solid #f4a05a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── SCROLLBAR ── */
+  .cal-panel::-webkit-scrollbar { width: 4px; }
+  .cal-panel::-webkit-scrollbar-track { background: transparent; }
+  .cal-panel::-webkit-scrollbar-thumb { background: var(--g-border); border-radius: 2px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--g-dark);
+    padding: 1.5rem 2.5rem;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255,255,255,.3);
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+  footer span { color: var(--g-lime); }
+
+  @media (max-width: 860px) {
+    .main { grid-template-columns: 1fr; }
+    .result-col { position: static; }
+    .tramite-grid { grid-template-columns: 1fr; }
+    .header-inner nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">GARRIGUES</a>
+    <nav>
+      <a href="#">Sobre nosotros</a>
+      <a href="#">Servicios</a>
+      <a href="#">Equipo</a>
+      <a href="#">Publicaciones</a>
+    </nav>
+    <div class="header-tag">Herramienta interna</div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">Área Laboral</div>
+    <h1>Calculadora de Plazos Procesales</h1>
+    <p>Cómputo automático de plazos laborales conforme a la LRJS, ET y LPACAP, con festivos por comunidad autónoma según el BOE.</p>
+  </div>
+</section>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="left-col">
+
+    <!-- Tipo de trámite -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-num">1</div>
+        <h2>Tipo de trámite</h2>
+      </div>
+      <div class="card-body">
+        <div class="tramite-grid" id="tramites"></div>
+        <div class="tramite-desc" id="tramite-desc"></div>
+      </div>
+    </div>
+
+    <!-- Datos notificación -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-num">2</div>
+        <h2>Datos de la notificación</h2>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Fecha de notificación / recepción</label>
+          <input type="date" id="fecha-notif">
+        </div>
+        <div class="field">
+          <label>Comunidad Autónoma</label>
+          <div class="select-wrap">
+            <select id="comunidad" onchange="updateFestivos()"></select>
+          </div>
+          <div class="field-hint" id="festivos-hint"></div>
+        </div>
+        <button class="btn-calc" onclick="calcular()">Calcular fecha de vencimiento</button>
+      </div>
+    </div>
+
+    <!-- Calendario festivos -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-num">3</div>
+        <h2>Festivos aplicables</h2>
+      </div>
+      <div class="card-body" style="padding-bottom:0">
+        <div class="boe-tag">BOE 2025–2026 · Datos oficiales</div>
+        <div class="cal-tabs">
+          <div class="cal-tab active" onclick="switchTab('nac',this)">Nacionales</div>
+          <div class="cal-tab" onclick="switchTab('ccaa',this)">Autonómicos</div>
+        </div>
+        <div class="cal-panel show" id="tab-nac"></div>
+        <div class="cal-panel" id="tab-ccaa"></div>
+      </div>
+    </div>
+
+  </div><!-- /left-col -->
+
+  <!-- RESULT COLUMN -->
+  <div class="result-col">
+    <div class="result-empty" id="result-empty">
+      <div class="result-empty-icon">⊙</div>
+      <p>Selecciona el tipo de trámite, introduce la fecha de notificación y pulsa calcular.</p>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-top">
+        <div class="result-label">Fecha de vencimiento</div>
+        <div class="result-date" id="res-date">—</div>
+        <div class="result-weekday" id="res-weekday"></div>
+      </div>
+      <div class="result-body">
+        <div class="result-row">
+          <span class="result-row-label">Trámite</span>
+          <span class="result-row-val" id="res-tramite"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Comunidad</span>
+          <span class="result-row-val" id="res-ccaa"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Notificación</span>
+          <span class="result-row-val" id="res-notif"></span>
+        </div>
+        <div class="result-row">
+          <span class="result-row-label">Plazo</span>
+          <span class="result-row-val" id="res-plazo"></span>
+        </div>
+      </div>
+      <div class="countdown">
+        <div class="countdown-num" id="res-dias">—</div>
+        <div class="countdown-text" id="res-dias-text">días naturales<br>hasta el vencimiento</div>
+      </div>
+      <div class="warn-alert" id="res-warn" style="display:none">
+        Plazo inminente — revisar y actuar con urgencia.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<footer>
+  © 2026 J&A Garrigues, S.L.P. &nbsp;·&nbsp; <span>Herramienta de uso interno</span> &nbsp;·&nbsp; Los cálculos son orientativos y no sustituyen el criterio profesional del abogado responsable.
+</footer>
+
+<script>
+const TRAMITES=[
+  {id:'alzada',name:'Recurso de alzada',plazo:'1 mes natural',tipo:'mes',desc:'Art. 122 LPACAP — 1 mes natural desde la notificación del acto impugnado. El cómputo se realiza de fecha a fecha. Si el vencimiento recae en festivo o fin de semana, se traslada al siguiente día hábil.'},
+  {id:'recl',name:'Reclamación previa',plazo:'20 días hábiles',dias:20,tipo:'habiles',desc:'Art. 70 LRJS — 20 días hábiles desde la fecha del hecho causante o desde la notificación de la resolución empresarial. Requisito previo obligatorio en determinados supuestos frente a Administraciones Públicas.'},
+  {id:'smac',name:'Papeleta de conciliación',plazo:'20 días hábiles',dias:20,tipo:'habiles',desc:'Art. 65 LRJS — La presentación de la papeleta ante el SMAC interrumpe los plazos de caducidad y prescripción. Tramitar antes de la demanda en la mayoría de reclamaciones.'},
+  {id:'demanda',name:'Demanda Juzgado Social',plazo:'20 días hábiles',dias:20,tipo:'habiles',desc:'Art. 59 ET / Art. 69 LRJS — Plazo de caducidad de 20 días hábiles desde la fecha del despido o del acto objeto de impugnación. Es improrrogable y su incumplimiento determina la firmeza del acto.'},
+];
+
+const CCAA=[
+  {id:'AND',name:'Andalucía'},{id:'ARA',name:'Aragón'},{id:'AST',name:'Asturias'},
+  {id:'BAL',name:'Illes Balears'},{id:'CAN',name:'Canarias'},{id:'CTB',name:'Cantabria'},
+  {id:'CLM',name:'Castilla-La Mancha'},{id:'CYL',name:'Castilla y León'},
+  {id:'CAT',name:'Catalunya'},{id:'CEU',name:'Ceuta'},{id:'EXT',name:'Extremadura'},
+  {id:'GAL',name:'Galicia'},{id:'MAD',name:'Madrid'},{id:'MEL',name:'Melilla'},
+  {id:'MUR',name:'Murcia'},{id:'NAV',name:'Navarra'},{id:'PVA',name:'País Vasco'},
+  {id:'RIO',name:'La Rioja'},{id:'VAL',name:'Comunitat Valenciana'},
+];
+
+const NACIONALES=[
+  {d:'2025-01-01',n:'Año Nuevo'},{d:'2025-01-06',n:'Epifanía del Señor'},
+  {d:'2025-04-17',n:'Jueves Santo'},{d:'2025-04-18',n:'Viernes Santo'},
+  {d:'2025-05-01',n:'Día del Trabajo'},{d:'2025-08-15',n:'Asunción de la Virgen'},
+  {d:'2025-10-12',n:'Fiesta Nacional de España'},{d:'2025-11-01',n:'Todos los Santos'},
+  {d:'2025-12-06',n:'Día de la Constitución'},{d:'2025-12-08',n:'Inmaculada Concepción'},
+  {d:'2025-12-25',n:'Natividad del Señor'},
+  {d:'2026-01-01',n:'Año Nuevo'},{d:'2026-01-06',n:'Epifanía del Señor'},
+  {d:'2026-04-02',n:'Jueves Santo'},{d:'2026-04-03',n:'Viernes Santo'},
+  {d:'2026-05-01',n:'Día del Trabajo'},{d:'2026-08-15',n:'Asunción de la Virgen'},
+  {d:'2026-10-12',n:'Fiesta Nacional de España'},{d:'2026-11-01',n:'Todos los Santos'},
+  {d:'2026-12-06',n:'Día de la Constitución'},{d:'2026-12-08',n:'Inmaculada Concepción'},
+  {d:'2026-12-25',n:'Natividad del Señor'},
+];
+
+const FEST_CCAA={
+  AND:[{d:'2025-02-28',n:'Día de Andalucía'},{d:'2025-04-18',n:'Viernes Santo (local)'},{d:'2026-02-28',n:'Día de Andalucía'},{d:'2026-04-02',n:'Jueves Santo (local)'}],
+  ARA:[{d:'2025-04-23',n:'San Jorge'},{d:'2026-04-23',n:'San Jorge'}],
+  AST:[{d:'2025-09-08',n:'Día de Asturias'},{d:'2026-09-08',n:'Día de Asturias'}],
+  BAL:[{d:'2025-03-01',n:'Día de las Illes Balears'},{d:'2026-03-01',n:'Día de las Illes Balears'}],
+  CAN:[{d:'2025-05-30',n:'Día de Canarias'},{d:'2026-05-30',n:'Día de Canarias'}],
+  CTB:[{d:'2025-07-28',n:'Día de Cantabria'},{d:'2026-07-28',n:'Día de Cantabria'}],
+  CLM:[{d:'2025-05-31',n:'Corpus Christi'},{d:'2026-05-31',n:'Corpus Christi'}],
+  CYL:[{d:'2025-04-23',n:'Día de Castilla y León'},{d:'2026-04-23',n:'Día de Castilla y León'}],
+  CAT:[{d:'2025-04-23',n:'Sant Jordi'},{d:'2025-06-24',n:'Sant Joan'},{d:'2026-04-23',n:'Sant Jordi'},{d:'2026-06-24',n:'Sant Joan'}],
+  CEU:[{d:'2025-03-05',n:'Carnaval'},{d:'2026-03-05',n:'Carnaval'}],
+  EXT:[{d:'2025-09-08',n:'Día de Extremadura'},{d:'2026-09-08',n:'Día de Extremadura'}],
+  GAL:[{d:'2025-07-25',n:'Día de Galicia'},{d:'2026-07-25',n:'Día de Galicia'}],
+  MAD:[{d:'2025-05-02',n:'Comunidad de Madrid'},{d:'2025-05-15',n:'San Isidro'},{d:'2026-05-02',n:'Comunidad de Madrid'},{d:'2026-05-15',n:'San Isidro'}],
+  MEL:[{d:'2025-09-02',n:'Día de Melilla'},{d:'2026-09-02',n:'Día de Melilla'}],
+  MUR:[{d:'2025-06-09',n:'Día de la Región de Murcia'},{d:'2026-06-09',n:'Día de la Región de Murcia'}],
+  NAV:[{d:'2025-09-27',n:'Día de Navarra'},{d:'2026-09-27',n:'Día de Navarra'}],
+  PVA:[{d:'2025-10-25',n:'Día del País Vasco'},{d:'2026-10-25',n:'Día del País Vasco'}],
+  RIO:[{d:'2025-06-11',n:'Día de La Rioja'},{d:'2026-06-11',n:'Día de La Rioja'}],
+  VAL:[{d:'2025-04-22',n:'Lunes de Pascua'},{d:'2025-10-09',n:'Día de la CV'},{d:'2026-04-22',n:'Lunes de Pascua'},{d:'2026-10-09',n:'Día de la CV'}],
+};
+
+let selectedTramite = null;
+
+// ── INIT ──
+(function init(){
+  const tg = document.getElementById('tramites');
+  TRAMITES.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'tramite-btn';
+    b.dataset.id = t.id;
+    b.innerHTML = `<div class="tramite-name">${t.name}</div><div class="tramite-plazo">${t.plazo}</div>`;
+    b.onclick = () => selectTramite(t);
+    tg.appendChild(b);
+  });
+
+  const sel = document.getElementById('comunidad');
+  CCAA.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name;
+    sel.appendChild(o);
+  });
+  sel.value = 'MAD';
+
+  const today = new Date();
+  document.getElementById('fecha-notif').value = toISO(today);
+
+  updateFestivos();
+  renderNacionales();
+})();
+
+function selectTramite(t){
+  selectedTramite = t;
+  document.querySelectorAll('.tramite-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector(`[data-id="${t.id}"]`).classList.add('selected');
+  const desc = document.getElementById('tramite-desc');
+  desc.textContent = t.desc;
+  desc.classList.add('show');
+}
+
+function toISO(d){ return d.toISOString().split('T')[0]; }
+
+function getFestivos(ccaaId){
+  const all = [...NACIONALES.map(f=>f.d), ...(FEST_CCAA[ccaaId]||[]).map(f=>f.d)];
+  return new Set(all);
+}
+
+function isHabil(d, festivos){
+  const dow = d.getDay();
+  if(dow===0||dow===6) return false;
+  return !festivos.has(toISO(d));
+}
+
+function addDiasHabiles(start, dias, festivos){
+  let d = new Date(start);
+  d.setDate(d.getDate()+1);
+  let count = 0;
+  while(count < dias){
+    if(isHabil(d, festivos)) count++;
+    if(count < dias) d.setDate(d.getDate()+1);
+  }
+  while(!isHabil(d, festivos)) d.setDate(d.getDate()+1);
+  return d;
+}
+
+function addMes(start, festivos){
+  let d = new Date(start);
+  d.setMonth(d.getMonth()+1);
+  while(!isHabil(d, festivos)) d.setDate(d.getDate()+1);
+  return d;
+}
+
+function fmtFull(d){
+  return d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function fmtShort(d){
+  return d.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+}
+function fmtWeekday(d){
+  return d.toLocaleDateString('es-ES',{weekday:'long'}).replace(/^\w/,c=>c.toUpperCase());
+}
+
+function daysUntil(d){
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.round((d - now)/(1000*60*60*24));
+}
+
+function calcular(){
+  if(!selectedTramite){ alert('Selecciona un tipo de trámite.'); return; }
+  const fechaStr = document.getElementById('fecha-notif').value;
+  if(!fechaStr){ alert('Introduce la fecha de notificación.'); return; }
+
+  const ccaaId = document.getElementById('comunidad').value;
+  const festivos = getFestivos(ccaaId);
+  const fechaNotif = new Date(fechaStr+'T12:00:00');
+  const ccaaNom = CCAA.find(c=>c.id===ccaaId)?.name||ccaaId;
+
+  let vencimiento;
+  if(selectedTramite.tipo==='mes'){
+    vencimiento = addMes(fechaNotif, festivos);
+  } else {
+    vencimiento = addDiasHabiles(fechaNotif, selectedTramite.dias, festivos);
+  }
+
+  const restantes = daysUntil(vencimiento);
+  const isWarn = restantes >= 0 && restantes <= 5;
+  const isExpired = restantes < 0;
+
+  // Populate result
+  document.getElementById('res-date').textContent = fmtShort(vencimiento);
+  document.getElementById('res-weekday').textContent = fmtWeekday(vencimiento);
+  document.getElementById('res-tramite').textContent = selectedTramite.name;
+  document.getElementById('res-ccaa').textContent = ccaaNom;
+  document.getElementById('res-notif').textContent = fmtShort(fechaNotif);
+  document.getElementById('res-plazo').textContent = selectedTramite.plazo;
+
+  let diasText, diasLabel;
+  if(isExpired){
+    diasText = Math.abs(restantes).toString();
+    diasLabel = `días de retraso<br>plazo vencido`;
+  } else if(restantes===0){
+    diasText = '0';
+    diasLabel = `vence hoy<br>actuar de inmediato`;
+  } else {
+    diasText = restantes.toString();
+    diasLabel = `días naturales<br>hasta el vencimiento`;
+  }
+  document.getElementById('res-dias').textContent = diasText;
+  document.getElementById('res-dias-text').innerHTML = diasLabel;
+
+  const warn = document.getElementById('res-warn');
+  warn.style.display = (isWarn||isExpired) ? 'flex' : 'none';
+  warn.textContent = isExpired
+    ? 'Plazo vencido — verificar posibilidad de subsanación.'
+    : 'Plazo inminente — revisar y actuar con urgencia.';
+
+  const card = document.getElementById('result-card');
+  card.className = 'result-card show' + (isWarn||isExpired ? ' warn' : '');
+  document.getElementById('result-empty').style.display = 'none';
+}
+
+function updateFestivos(){
+  const ccaaId = document.getElementById('comunidad').value;
+  const extra = FEST_CCAA[ccaaId]||[];
+  const nom = CCAA.find(c=>c.id===ccaaId)?.name||'';
+  document.getElementById('festivos-hint').textContent =
+    `${NACIONALES.length} festivos nacionales + ${extra.length} festivos de ${nom}`;
+  renderCCAA(ccaaId);
+}
+
+function renderNacionales(){
+  const el = document.getElementById('tab-nac');
+  el.innerHTML = NACIONALES.map(f=>`
+    <div class="cal-row">
+      <span class="cal-date">${new Date(f.d+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'})}</span>
+      <span class="cal-name">${f.n}</span>
+    </div>`).join('');
+}
+
+function renderCCAA(ccaaId){
+  const extra = FEST_CCAA[ccaaId]||[];
+  const el = document.getElementById('tab-ccaa');
+  if(!extra.length){
+    el.innerHTML = '<div style="font-size:12px;color:var(--g-muted);padding:1rem 0">No hay festivos autonómicos registrados para el período seleccionado.</div>';
+    return;
+  }
+  el.innerHTML = extra.map(f=>`
+    <div class="cal-row">
+      <span class="cal-date">${new Date(f.d+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'})}</span>
+      <span class="cal-name">${f.n}</span>
+    </div>`).join('');
+}
+
+function switchTab(tabId, el){
+  document.querySelectorAll('.cal-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.cal-panel').forEach(p=>p.classList.remove('show'));
+  el.classList.add('active');
+  document.getElementById('tab-'+tabId).classList.add('show');
+}
+</script>
+</body>
+</html>

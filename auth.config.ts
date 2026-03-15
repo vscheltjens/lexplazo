@@ -4,6 +4,7 @@ import type { NextAuthConfig } from 'next-auth'
 // Used by middleware.ts for route protection.
 // The full auth.ts adds the Credentials provider with bcrypt.
 export const authConfig = {
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   pages: { signIn: '/admin/login' },
   providers: [],
   callbacks: {

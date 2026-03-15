@@ -16,6 +16,7 @@ interface DeadlineResult {
   tramiteName: string
   plazoLabel:  string
   ccaaNombre:  string
+  ccaaId:      string
   fechaNotif:  Date
   diasRestantes: number
 }
@@ -58,6 +59,10 @@ export function CalculatorClient({ tramites, festivos }: Props) {
   const [result, setResult] = useState<DeadlineResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'nac' | 'ccaa'>('nac')
+  const [reminderEmail, setReminderEmail] = useState('')
+  const [reminderStatus, setReminderStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [reminderDate, setReminderDate] = useState<string | null>(null)
+  const [reminderError, setReminderError] = useState<string | null>(null)
 
   // Build festivos sets
   const festivosNac = useMemo(
@@ -107,9 +112,41 @@ export function CalculatorClient({ tramites, festivos }: Props) {
       tramiteName:   selectedTramite.name,
       plazoLabel:    selectedTramite.plazoLabel,
       ccaaNombre,
+      ccaaId:        comunidadId,
       fechaNotif:    fechaDate,
       diasRestantes,
     })
+  }
+
+  async function handleReminder(e: React.FormEvent) {
+    e.preventDefault()
+    if (!result) return
+    setReminderStatus('loading')
+    setReminderError(null)
+    try {
+      const res = await fetch('/api/recordatorios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: reminderEmail,
+          tramiteNombre: result.tramiteName,
+          fechaVencimiento: toISO(result.vencimiento),
+          ccaa: result.ccaaId,
+          plazoLabel: result.plazoLabel,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setReminderError(data.error ?? 'Error al registrar el recordatorio.')
+        setReminderStatus('error')
+      } else {
+        setReminderDate(data.fechaRecordatorio)
+        setReminderStatus('success')
+      }
+    } catch {
+      setReminderError('Error de conexión. Inténtalo de nuevo.')
+      setReminderStatus('error')
+    }
   }
 
   const isWarn    = result !== null && result.diasRestantes >= 0 && result.diasRestantes <= 5
@@ -343,7 +380,7 @@ export function CalculatorClient({ tramites, festivos }: Props) {
         </div>
 
         {/* RIGHT COLUMN — Result */}
-        <div className="lg:sticky lg:top-24">
+        <div className="lg:sticky lg:top-24 space-y-4">
           {!result ? (
             <div className="bg-white border border-lx-border rounded-sm p-10 text-center text-lx-muted">
               <div className="w-12 h-12 rounded-full border border-lx-border flex items-center justify-center mx-auto mb-4 text-xl">
@@ -354,6 +391,7 @@ export function CalculatorClient({ tramites, festivos }: Props) {
               </p>
             </div>
           ) : (
+            <>
             <div
               className={`rounded-sm overflow-hidden animate-[fadeUp_0.3s_ease] ${
                 isWarn || isExpired ? 'bg-[#3d2008]' : 'bg-lx-navy'
@@ -418,6 +456,65 @@ export function CalculatorClient({ tramites, festivos }: Props) {
                 </div>
               )}
             </div>
+
+            {/* ── Reminder card ── */}
+            {!isExpired && (
+              <div className="bg-lx-navy/95 border border-white/10 rounded-sm overflow-hidden">
+                <div className="px-5 py-4 border-b border-white/10">
+                  <p className="text-[11px] font-medium text-lx-ochre tracking-[0.1em] uppercase mb-0.5">
+                    Recordatorio de vencimiento
+                  </p>
+                  <p className="text-[12px] text-white/50 leading-snug">
+                    Recibe un aviso por email 2 días hábiles antes de que venza el plazo.
+                  </p>
+                </div>
+                <div className="px-5 py-4">
+                  {reminderStatus === 'success' && reminderDate ? (
+                    <div className="flex items-start gap-3">
+                      <span className="w-5 h-5 rounded-full bg-lx-ochre/20 border border-lx-ochre flex items-center justify-center text-lx-ochre text-[11px] font-bold flex-shrink-0 mt-0.5">✓</span>
+                      <div>
+                        <p className="text-[13px] text-white font-medium">Recordatorio registrado</p>
+                        <p className="text-[12px] text-white/50 mt-0.5">
+                          Te avisaremos el{' '}
+                          <span className="text-lx-ochre-lt font-medium">
+                            {new Date(reminderDate + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleReminder} className="space-y-3">
+                      <div>
+                        <label htmlFor="reminder-email" className="block text-[11px] font-medium text-white/40 uppercase tracking-[0.04em] mb-1.5">
+                          Tu email
+                        </label>
+                        <input
+                          id="reminder-email"
+                          type="email"
+                          required
+                          value={reminderEmail}
+                          onChange={(e) => setReminderEmail(e.target.value)}
+                          placeholder="nombre@despacho.com"
+                          className="w-full px-3 py-2.5 text-sm bg-white/[0.07] border border-white/15 rounded-sm text-white placeholder:text-white/25 focus:outline-none focus:border-lx-ochre/50 transition-colors"
+                        />
+                      </div>
+                      {reminderError && (
+                        <p className="text-[12px] text-[#f4a05a]">{reminderError}</p>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={reminderStatus === 'loading'}
+                        className="relative w-full py-2.5 bg-white/[0.08] hover:bg-white/[0.13] border border-white/15 hover:border-lx-ochre/40 text-white text-[13px] font-medium tracking-wide rounded-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                      >
+                        <span className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-lx-ochre/60" />
+                        {reminderStatus === 'loading' ? 'Registrando…' : 'Avísame antes del vencimiento'}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </div>
+            )}
+            </>
           )}
         </div>
       </main>

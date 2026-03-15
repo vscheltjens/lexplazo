@@ -55,7 +55,19 @@ export const boeSyncLogs = pgTable('boe_sync_logs', {
   triggeredAt:    timestamp('triggered_at').notNull().defaultNow(),
 })
 
-export type Tramite    = typeof tramites.$inferSelect
+export const recordatorios = pgTable('recordatorios', {
+  id:                uuid('id').primaryKey().defaultRandom(),
+  email:             text('email').notNull(),
+  tramiteNombre:     text('tramite_nombre').notNull(),
+  fechaVencimiento:  date('fecha_vencimiento').notNull(),
+  fechaRecordatorio: date('fecha_recordatorio').notNull(),
+  ccaa:              text('ccaa').notNull(),
+  plazoLabel:        text('plazo_label').notNull(),
+  status:            text('status').notNull().default('pending'), // 'pending' | 'sent' | 'cancelled'
+  createdAt:         timestamp('created_at').notNull().defaultNow(),
+})
+
+export type Tramite       = typeof tramites.$inferSelect
 export type NewTramite = typeof tramites.$inferInsert
 export type Festivo    = typeof festivos.$inferSelect
 export type Comunidad  = typeof comunidades.$inferSelect
